@@ -17,18 +17,37 @@ PrettyPrintSize() {
 API_KEY=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "${CONFIG_DIR}/app/config.xml")
 TIMESTAMP=$(date -u --iso-8601=seconds)
 
-if [[ ${radarr_eventtype} == "Test" ]] || [[ ${1} == "Radarr" ]]; then
+if [[ ${1} == "Radarr" ]]; then
     radarr_eventtype="Download"
     radarr_movie_tmdbid="612706"
     radarr_isupgrade="False"
 fi
 
-if [[ ${sonarr_eventtype} == "Test" ]] || [[ ${1} == "Sonarr" ]]; then
+if [[ ${1} == "Sonarr" ]]; then
     sonarr_eventtype="Download"
     sonarr_series_tvdbid="268592"
     sonarr_isupgrade="True"
     sonarr_episodefile_seasonnumber="1"
     sonarr_episodefile_episodenumbers="1,2"
+fi
+
+if [[ ${radarr_eventtype} == "Test" ]]; then
+    COLOR="16761392"
+
+    json='
+    {
+        "embeds":
+            [
+                {
+                    "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                    "title": "Test succeeded!",
+                    "color": "'${COLOR}'",
+                    "timestamp": "'${TIMESTAMP}'",
+                }
+            ]
+    }
+    '
+    curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
 fi
 
 if [[ ${radarr_eventtype} == "Download" ]]; then
@@ -106,6 +125,25 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
                             '${movie_subtitles_field}'
                             '${movie_scene_name_field}'
                         ]
+                }
+            ]
+    }
+    '
+    curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
+fi
+
+if [[ ${sonarr_eventtype} == "Test" ]]; then
+    COLOR="2200501"
+
+    json='
+    {
+        "embeds":
+            [
+                {
+                    "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                    "title": "Test succeeded!",
+                    "color": "'${COLOR}'",
+                    "timestamp": "'${TIMESTAMP}'",
                 }
             ]
     }
