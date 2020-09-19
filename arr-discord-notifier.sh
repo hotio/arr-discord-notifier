@@ -40,7 +40,9 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
 
     json="$(curl -fsSL --request GET "localhost:7878/api/movie/lookup/tmdb?tmdbId=${radarr_movie_tmdbid}&apikey=${API_KEY}")"
     movie_poster=$(echo "${json}" | jq -r '.images[] | select(.coverType=="poster") | .url')
+    [[ -z ${movie_poster} ]] && movie_poster="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/poster.png"
     movie_backdrop=$(echo "${json}" | jq -r '.images[] | select(.coverType=="fanart") | .url' | sed s/original/w500/)
+    [[ -z ${movie_backdrop} ]] && movie_backdrop="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/backdrop.png"
     movie_release_year=$(echo "${json}" | jq -r '.year')
     movie_size=$(du -h "${radarr_moviefile_path}" | awk '{print $1}')
     if [[ -z ${radarr_moviefile_releasegroup} ]]; then
@@ -54,7 +56,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
         "embeds":
             [
                 {
-                    "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/docker-radarr/master/img/radarr.png"},
+                    "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "'${radarr_movie_title}' ('${movie_release_year}')",
                     "url": "https://www.themoviedb.org/movie/'${radarr_movie_tmdbid}'",
                     "thumbnail": {"url": "'${movie_poster}'"},
@@ -88,7 +90,9 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
 
     json="$(curl -fsSL --request GET "localhost:8989/api/series/lookup?term=tvdb:${sonarr_series_tvdbid}&apikey=${API_KEY}")"
     tv_poster=$(echo "${json}" | jq -r '.[].images[] | select(.coverType=="poster") | .url')
+    [[ -z ${tv_poster} ]] && tv_poster="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/poster.png"
     tv_backdrop=$(echo "${json}" | jq -r '.[].images[] | select(.coverType=="fanart") | .url' | sed s/.jpg/_t.jpg/)
+    [[ -z ${tv_backdrop} ]] && tv_backdrop="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/backdrop.png"
     tv_release_year=$(echo "${json}" | jq -r '.[].year')
     tv_size=$(du -h "${sonarr_episodefile_path}" | awk '{print $1}')
     if [[ -z ${sonarr_episodefile_releasegroup} ]]; then
@@ -109,7 +113,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             "embeds":
                 [
                     {
-                        "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/docker-sonarr/master/img/sonarr.png"},
+                        "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                         "title": "'${sonarr_series_title//([[:digit:]][[:digit:]][[:digit:]][[:digit:]])/}' ('${tv_release_year}')",
                         "url": "http://www.thetvdb.com/?tab=series&id='${sonarr_series_tvdbid}'",
                         "thumbnail": {"url": "'${tv_poster}'"},
