@@ -42,7 +42,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "Test succeeded!",
                     "color": "'${COLOR}'",
-                    "timestamp": "'${TIMESTAMP}'",
+                    "timestamp": "'${TIMESTAMP}'"
                 }
             ]
     }
@@ -143,7 +143,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
                     "color": "'${COLOR}'",
-                    "timestamp": "'${TIMESTAMP}'",
+                    "timestamp": "'${TIMESTAMP}'"
                 }
             ]
     }
