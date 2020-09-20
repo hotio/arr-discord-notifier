@@ -38,7 +38,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
                 {
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "Test succeeded!",
-                    "description": "If you can read this we were able to send to your webhook without any problems. Below you can also find a test notification for one of your movies.",
+                    "description": "If you can read this we were able to send to your webhook without any problems. Below you will see a sample notification for one of your movies.",
                     "color": "'${COLOR}'",
                     "timestamp": "'${TIMESTAMP}'"
                 }
@@ -48,7 +48,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
     curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
 
     radarr_eventtype="Download"
-    radarr_movie_tmdbid="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[0].tmdbId')"
+    radarr_movie_tmdbid="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
     radarr_isupgrade="False"
 fi
 
@@ -62,7 +62,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
                 {
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
-                    "description": "If you can read this we were able to send to your webhook without any problems. Below you can also find 2 test notifications for one of your tv shows.",
+                    "description": "If you can read this we were able to send to your webhook without any problems. Below you will see 2 sample notifications for one of your tv shows.",
                     "color": "'${COLOR}'",
                     "timestamp": "'${TIMESTAMP}'"
                 }
@@ -72,7 +72,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
     curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
 
     sonarr_eventtype="Download"
-    sonarr_series_tvdbid="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[0].tvdbId')"
+    sonarr_series_tvdbid="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | .tvdbId' | sort -R | head -n 1)"
     sonarr_isupgrade="True"
     sonarr_episodefile_seasonnumber="1"
     sonarr_episodefile_episodenumbers="1,2"
