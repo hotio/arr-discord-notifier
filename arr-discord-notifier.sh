@@ -62,7 +62,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
                 {
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
-                    "description": "If you can read this we were able to send to your webhook without any problems. Below you can also find a test notification for one of your tv shows.",
+                    "description": "If you can read this we were able to send to your webhook without any problems. Below you can also find 2 test notifications for one of your tv shows.",
                     "color": "'${COLOR}'",
                     "timestamp": "'${TIMESTAMP}'"
                 }
