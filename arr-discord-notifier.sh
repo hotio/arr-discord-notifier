@@ -225,6 +225,16 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             episode_scene_name_field=',{"name": "Release", "value": "```'${episode_scene_name}'```"}'
         fi
 
+        if [[ -n ${TMDB_API_KEY} ]]; then
+            tvshow_tmdbid="$(curl -fsSL "https://api.themoviedb.org/3/find/${sonarr_series_tvdbid}?api_key=${TMDB_API_KEY}&external_source=tvdb_id" | jq -r '.tv_results[0].id')"
+            if [[ ${tvshow_tmdbid} != null ]]; then
+                episode_still="$(curl -fsSL "https://api.themoviedb.org/3/tv/${tvshow_tmdbid}/season/${sonarr_episodefile_seasonnumber}/episode/${episodes[i]}?api_key=${TMDB_API_KEY}" | jq -r .still_path)"
+                if [[ ${episode_still} != null ]]; then
+                    tvshow_backdrop="https://image.tmdb.org/t/p/w500${episode_still}"
+                fi
+            fi
+        fi
+
         json='
         {
             "embeds":
