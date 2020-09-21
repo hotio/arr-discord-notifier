@@ -4,6 +4,10 @@ Send pretty *arr notifications to discord (bundled with hotio docker images). On
 
 ## Configuration
 
-You should add the following `Connect` settings to Sonarr/Radarr. To your docker container you add the environment variable `DISCORD_WEBHOOK` with your webhook url provided by Discord. After that hit the `Test` button and you should see a notification appear in your discord channel. If you also configure the environment variable `TMDB_API_KEY`, if found it will use an episode still as backdrop image.
+Add a `Custom Script` to the `Connect` settings in Sonarr/Radarr as seen below.  
 
-<img src="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/config.png" alt="Config Screenshot">
+Then add the environment variable `DISCORD_WEBHOOK` with your webhook url provided by Discord to the container. After that hit the `Test` button and you should see a notification appear in your discord channel.  
+
+If you also configure the environment variable `TMDB_API_KEY`, when possible it will use an episode still as a backdrop image. If you want to hide some fields, you can use `DROP_FIELDS="backdrop overview release airdate"` as a variable, all field names in lowercase, `backdrop` and `poster` are valid values.
+
+<img src="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/config.png" alt="Config Screenshot" width=600>
