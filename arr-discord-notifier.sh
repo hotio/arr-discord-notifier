@@ -115,6 +115,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
     if [[ ${DROP_FIELDS} != *overview* ]]; then
         movie_overview=$(echo "${movie}" | jq -r '.[].overview')
         if [[ ${movie_overview} != "null" ]] && [[ -n ${movie_overview} ]]; then
+            movie_overview=${movie_overview//\"/\'}
             [[ ${#movie_overview} -gt 300 ]] && dots="..."
             movie_overview_field='{"name": "Overview", "value": "'${movie_overview:0:300}${dots}'"},'
         fi
@@ -317,6 +318,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
         if [[ ${DROP_FIELDS} != *title* ]]; then
             episode_title=$(echo "${episode}" | jq -r '.title')
             if [[ ${episode_title} != "null" ]] && [[ -n ${episode_title} ]]; then
+                episode_title=${episode_title//\"/\'}
                 episode_title_field='{"name": "Title", "value": "'${episode_title}'"},'
             fi
         fi
@@ -325,6 +327,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
         if [[ ${DROP_FIELDS} != *overview* ]]; then
             episode_overview=$(echo "${episode}" | jq -r '.overview')
             if [[ ${episode_overview} != "null" ]] && [[ -n ${episode_overview} ]]; then
+                episode_overview=${episode_overview//\"/\'}
                 [[ ${#episode_overview} -gt 300 ]] && dots="..."
                 episode_overview_field='{"name": "Overview", "value": "'${episode_overview:0:300}${dots}'"},'
             fi
