@@ -85,45 +85,63 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
 
     movie="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?tmdbId=${radarr_movie_tmdbid}&apikey=${API_KEY}")"
 
-    movie_title=$(echo "${movie}" | jq -r '.[].title')
-    movie_release_year=$(echo "${movie}" | jq -r '.[].year')
-    movie_quality=$(echo "${movie}" | jq -r '.[].movieFile.quality.quality.name')
-    movie_video=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.videoCodec')
-    movie_audio="$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioCodec') $(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioChannels')"
-    movie_size=$(PrettyPrintSize "$(echo "${movie}" | jq -r '.[].movieFile.size')")
-
+    # Poster
     movie_poster=$(echo "${movie}" | jq -r '.[].images[] | select(.coverType=="poster") | .remoteUrl')
     [[ -z ${movie_poster} ]] && movie_poster="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/poster.png"
 
+    # Backdrop
     movie_backdrop=$(echo "${movie}" | jq -r '.[].images[] | select(.coverType=="fanart") | .remoteUrl' | sed s/original/w500/)
     [[ -z ${movie_backdrop} ]] && movie_backdrop="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/backdrop.png"
 
+    # Movie Name (Year)
+    movie_title=$(echo "${movie}" | jq -r '.[].title')
+    movie_release_year=$(echo "${movie}" | jq -r '.[].year')
+
+    # Overview
     movie_overview=$(echo "${movie}" | jq -r '.[].overview')
     if [[ ${movie_overview} != "null" ]] && [[ -n ${movie_overview} ]]; then
         [[ ${#movie_overview} -gt 300 ]] && dots="..."
         movie_overview_field='{"name": "Overview", "value": "'${movie_overview:0:300}${dots}'"},'
     fi
 
-    movie_genres=$(echo "${movie}" | jq -r '.[].genres | join(", ")')
-    if [[ ${movie_genres} != "null" ]] && [[ -n ${movie_genres} ]]; then
-        movie_genres_field='{"name": "Genres", "value": "'${movie_genres}'"},'
-    fi
-
+    # Rating
     movie_rating=$(echo "${movie}" | jq -r '.[].ratings.value')
     if [[ ${movie_rating} != "0" ]] && [[ -n ${movie_rating} ]]; then
         movie_rating_field='{"name": "Rating", "value": "'${movie_rating}'"},'
     fi
 
+    # Genres
+    movie_genres=$(echo "${movie}" | jq -r '.[].genres | join(", ")')
+    if [[ ${movie_genres} != "null" ]] && [[ -n ${movie_genres} ]]; then
+        movie_genres_field='{"name": "Genres", "value": "'${movie_genres}'"},'
+    fi
+
+    # Quality
+    movie_quality=$(echo "${movie}" | jq -r '.[].movieFile.quality.quality.name')
+
+    # Codecs
+    movie_video=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.videoCodec')
+    movie_audio="$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioCodec') $(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioChannels')"
+    if [[ ${movie_video} != "null" ]] && [[ -n ${movie_video} ]]; then
+        movie_codecs_field='{"name": "Codecs", "value": "'${movie_video}' / '${movie_audio}'", "inline": true},'
+    fi
+
+    # Size
+    movie_size=$(PrettyPrintSize "$(echo "${movie}" | jq -r '.[].movieFile.size')")
+
+    # Languages
     movie_languages=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioLanguages')
     if [[ ${movie_languages} != "null" ]] && [[ -n ${movie_languages} ]]; then
         movie_languages_field=',{"name": "Languages", "value": "'${movie_languages}'"}'
     fi
 
+    # Subtitles
     movie_subtitles=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.subtitles')
     if [[ ${movie_subtitles} != "null" ]] && [[ -n ${movie_subtitles} ]]; then
         movie_subtitles_field=',{"name": "Subtitles", "value": "'${movie_subtitles}'"}'
     fi
 
+    # Release
     movie_scene_name=$(echo "${movie}" | jq -r '.[].movieFile.sceneName')
     if [[ ${movie_scene_name} != "null" ]] && [[ -n ${movie_scene_name} ]]; then
         movie_scene_name_field=',{"name": "Release", "value": "```'${movie_scene_name}'```"}'
@@ -147,7 +165,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
                             '${movie_rating_field}'
                             '${movie_genres_field}'
                             {"name": "Quality", "value": "'${movie_quality}'", "inline": true},
-                            {"name": "Codecs", "value": "'${movie_video}' / '${movie_audio}'", "inline": true},
+                            '${movie_codecs_field}'
                             {"name": "Size", "value": "'${movie_size}'", "inline": true}
                             '${movie_languages_field}'
                             '${movie_subtitles_field}'
@@ -165,23 +183,29 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
 
     tvshow="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?tvdbId=${sonarr_series_tvdbid}&apikey=${API_KEY}")"
     tvshow_id=$(echo "${tvshow}" | jq -r '.[].id')
-    tvshow_title=$(echo "${tvshow}" | jq -r '.[].title')
-    tvshow_release_year=$(echo "${tvshow}" | jq -r '.[].year')
 
+    # Poster
     tvshow_poster=$(echo "${tvshow}" | jq -r '.[].images[] | select(.coverType=="poster") | .remoteUrl')
     [[ -z ${tvshow_poster} ]] && tvshow_poster="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/poster.png"
 
+    # Backdrop
     tvshow_backdrop=$(echo "${tvshow}" | jq -r '.[].images[] | select(.coverType=="fanart") | .remoteUrl' | sed s/.jpg/_t.jpg/)
     [[ -z ${tvshow_backdrop} ]] && tvshow_backdrop="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/backdrop.png"
 
-    tvshow_genres=$(echo "${tvshow}" | jq -r '.[].genres | join(", ")')
-    if [[ ${tvshow_genres} != "null" ]] && [[ -n ${tvshow_genres} ]]; then
-        tvshow_genres_field='{"name": "Genres", "value": "'${tvshow_genres}'"},'
-    fi
+    # TV Show Name (Year)
+    tvshow_title=$(echo "${tvshow}" | jq -r '.[].title')
+    tvshow_release_year=$(echo "${tvshow}" | jq -r '.[].year')
 
+    # Rating
     tvshow_rating=$(echo "${tvshow}" | jq -r '.[].ratings.value')
     if [[ ${tvshow_rating} != "0" ]] && [[ -n ${tvshow_rating} ]]; then
         tvshow_rating_field='{"name": "Rating", "value": "'${tvshow_rating}'"},'
+    fi
+
+    # Genres
+    tvshow_genres=$(echo "${tvshow}" | jq -r '.[].genres | join(", ")')
+    if [[ ${tvshow_genres} != "null" ]] && [[ -n ${tvshow_genres} ]]; then
+        tvshow_genres_field='{"name": "Genres", "value": "'${tvshow_genres}'"},'
     fi
 
     DEFAULTIFS="${IFS}"
@@ -193,38 +217,54 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
         episode=$(curl -fsSL --request GET "${HOST}:8989/api/v3/episode?seriesId=${tvshow_id}&apikey=${API_KEY}" | jq -r ".[] | select(.seasonNumber==${sonarr_episodefile_seasonnumber}) | select(.episodeNumber==${episodes[i]})")
         episode_file=$(curl -fsSL --request GET "${HOST}:8989/api/v3/episodefile?seriesId=${tvshow_id}&apikey=${API_KEY}" | jq -r ".[] | select(.id==$(echo "${episode}" | jq -r '.episodeFileId'))")
 
+        # Air Date
         episode_airdate=$(echo "${episode}" | jq -r '.airDate')
-        episode_quality=$(echo "${episode_file}" | jq -r '.quality.quality.name')
-        episode_video=$(echo "${episode_file}" | jq -r '.mediaInfo.videoCodec')
-        episode_audio="$(echo "${episode_file}" | jq -r '.mediaInfo.audioCodec') $(echo "${episode_file}" | jq -r '.mediaInfo.audioChannels')"
-        episode_size=$(PrettyPrintSize "$(echo "${episode_file}" | jq -r '.size')")
 
+        # Title
         episode_title=$(echo "${episode}" | jq -r '.title')
         if [[ ${episode_title} != "null" ]] && [[ -n ${episode_title} ]]; then
             episode_title_field='{"name": "Title", "value": "'${episode_title}'"},'
         fi
 
+        # Overview
         episode_overview=$(echo "${episode}" | jq -r '.overview')
         if [[ ${episode_overview} != "null" ]] && [[ -n ${episode_overview} ]]; then
             [[ ${#episode_overview} -gt 300 ]] && dots="..."
             episode_overview_field='{"name": "Overview", "value": "'${episode_overview:0:300}${dots}'"},'
         fi
 
+        # Quality
+        episode_quality=$(echo "${episode_file}" | jq -r '.quality.quality.name')
+
+        # Codecs
+        episode_video=$(echo "${episode_file}" | jq -r '.mediaInfo.videoCodec')
+        episode_audio="$(echo "${episode_file}" | jq -r '.mediaInfo.audioCodec') $(echo "${episode_file}" | jq -r '.mediaInfo.audioChannels')"
+        if [[ ${episode_video} != "null" ]] && [[ -n ${episode_video} ]]; then
+            episode_codecs_field='{"name": "Codecs", "value": "'${episode_video}' / '${episode_audio}'", "inline": true},'
+        fi
+
+        # Size
+        episode_size=$(PrettyPrintSize "$(echo "${episode_file}" | jq -r '.size')")
+
+        # Languages
         episode_languages=$(echo "${episode_file}" | jq -r '.mediaInfo.audioLanguages')
         if [[ ${episode_languages} != "null" ]] && [[ -n ${episode_languages} ]]; then
             episode_languages_field=',{"name": "Languages", "value": "'${episode_languages}'"}'
         fi
 
+        # Subtitles
         episode_subtitles=$(echo "${episode_file}" | jq -r '.mediaInfo.subtitles')
         if [[ ${episode_subtitles} != "null" ]] && [[ -n ${episode_subtitles} ]]; then
             episode_subtitles_field=',{"name": "Subtitles", "value": "'${episode_subtitles}'"}'
         fi
 
+        # Release
         episode_scene_name=$(echo "${episode_file}" | jq -r '.sceneName')
         if [[ ${episode_scene_name} != "null" ]] && [[ -n ${episode_scene_name} ]]; then
             episode_scene_name_field=',{"name": "Release", "value": "```'${episode_scene_name}'```"}'
         fi
 
+        # Episode Still if found
         if [[ -n ${TMDB_API_KEY} ]]; then
             tvshow_tmdbid="$(curl -fsSL "https://api.themoviedb.org/3/find/${sonarr_series_tvdbid}?api_key=${TMDB_API_KEY}&external_source=tvdb_id" | jq -r '.tv_results[0].id')"
             if [[ ${tvshow_tmdbid} != null ]]; then
@@ -256,7 +296,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                                 '${tvshow_rating_field}'
                                 '${tvshow_genres_field}'
                                 {"name": "Quality", "value": "'${episode_quality}'", "inline": true},
-                                {"name": "Codecs", "value": "'${episode_video}' / '${episode_audio}'", "inline": true},
+                                '${episode_codecs_field}'
                                 {"name": "Size", "value": "'${episode_size}'", "inline": true}
                                 '${episode_languages_field}'
                                 '${episode_subtitles_field}'
