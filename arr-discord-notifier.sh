@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 PrettyPrintSize() {
     if [[ $1 -lt 1024 ]]; then
         printf "%0.2f B" "$(echo "${1}" | awk '{print $1}')"
@@ -31,6 +29,15 @@ fi
 if [[ ${radarr_eventtype} == "Test" ]]; then
     COLOR="16761392"
 
+    radarr_movie_tmdbid="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
+
+    if [[ -n ${radarr_movie_tmdbid} ]]; then
+        radarr_eventtype="Download"
+        radarr_isupgrade="False"
+    else
+        radarr_movie_tmdbid="no movies found"
+    fi
+
     json='
     {
         "embeds":
@@ -38,7 +45,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
                 {
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "Test succeeded!",
-                    "description": "We were able to send to your webhook without any problems. Below you should see a random sample notification for one of your movies, if any were found that met the requirements.",
+                    "description": "We were able to send to your webhook without any problems. Below you should see a sample notification for the movie `tmdb:'${radarr_movie_tmdbid}'`.",
                     "color": "'${COLOR}'",
                     "timestamp": "'${TIMESTAMP}'"
                 }
@@ -47,14 +54,21 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
     '
     curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
 
-    radarr_movie_tmdbid="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
-    [[ -z ${radarr_movie_tmdbid} ]] && exit 0
-    radarr_eventtype="Download"
-    radarr_isupgrade="False"
 fi
 
 if [[ ${sonarr_eventtype} == "Test" ]]; then
     COLOR="2200501"
+
+    sonarr_series_tvdbid="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort -R | head -n 1)"
+
+    if [[ -n ${sonarr_series_tvdbid} ]]; then
+        sonarr_eventtype="Download"
+        sonarr_isupgrade="False"
+        sonarr_episodefile_seasonnumber="1"
+        sonarr_episodefile_episodenumbers="1,2"
+    else
+        sonarr_series_tvdbid="no tv shows found"
+    fi
 
     json='
     {
@@ -63,7 +77,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
                 {
                     "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
-                    "description": "We were able to send to your webhook without any problems. Below you should see 2 random sample notifications for one of your tv shows, if any were found that met the requirements.",
+                    "description": "We were able to send to your webhook without any problems. Below you should see 2 sample notifications for the tv show `tvdb:'${sonarr_series_tvdbid}'`.",
                     "color": "'${COLOR}'",
                     "timestamp": "'${TIMESTAMP}'"
                 }
@@ -72,12 +86,6 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
     '
     curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
 
-    sonarr_series_tvdbid="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort -R | head -n 1)"
-    [[ -z ${sonarr_series_tvdbid} ]] && exit 0
-    sonarr_eventtype="Download"
-    sonarr_isupgrade="False"
-    sonarr_episodefile_seasonnumber="1"
-    sonarr_episodefile_episodenumbers="1,2"
 fi
 
 if [[ ${radarr_eventtype} == "Download" ]]; then
@@ -213,6 +221,27 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
     }
     '
     curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
+    result=$?
+
+    if [[ ${result} -gt 0 ]]; then
+        COLOR="15746887"
+
+        json='
+        {
+            "embeds":
+                [
+                    {
+                        "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                        "title": "Failure!",
+                        "description": "Something went wrong trying to send a notification for movie `tmdb:'${radarr_movie_tmdbid}'`.",
+                        "color": "'${COLOR}'",
+                        "timestamp": "'${TIMESTAMP}'"
+                    }
+                ]
+        }
+        '
+        curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
+    fi
 fi
 
 if [[ ${sonarr_eventtype} == "Download" ]]; then
@@ -382,6 +411,28 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
         }
         '
         curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
+        result=$?
+
+        if [[ ${result} -gt 0 ]]; then
+            COLOR="15746887"
+
+            json='
+            {
+                "embeds":
+                    [
+                        {
+                            "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                            "title": "Failure!",
+                            "description": "Something went wrong trying to send a notification for tv show `tvdb:'${sonarr_series_tvdbid}'`.",
+                            "color": "'${COLOR}'",
+                            "timestamp": "'${TIMESTAMP}'"
+                        }
+                    ]
+            }
+            '
+            curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${DISCORD_WEBHOOK}"
+        fi
+
         sleep 5
     done
 fi
