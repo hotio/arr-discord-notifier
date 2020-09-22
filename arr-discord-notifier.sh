@@ -12,11 +12,11 @@ PrettyPrintSize() {
     fi
 }
 
-[[ -z ${DISCORD_WEBHOOK} ]] && >&2 echo "No Discord webhook is configured!" && exit 1
-[[ -z ${API_KEY} ]] && API_KEY=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "${CONFIG_DIR}/app/config.xml")
-[[ -z ${API_KEY} ]] && >&2 echo "No API_KEY could be configured!" && exit 1
-[[ -z ${HOST} ]] && HOST=localhost
-TIMESTAMP=$(date -u --iso-8601=seconds)
+[[ -z ${API_KEY} ]]     && API_KEY=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "${CONFIG_DIR}/app/config.xml")
+[[ -z ${API_KEY} ]]     && >&2 echo "No API_KEY could be found!" && exit 1
+[[ -z ${API_HOST} ]]    && API_HOST=localhost
+[[ -z ${AUTHOR_NAME} ]] && AUTHOR_NAME=${HOSTNAME}
+[[ -z ${TIMESTAMP} ]]   && TIMESTAMP=$(date -u --iso-8601=seconds)
 
 if [[ ${1} == "Radarr" ]]; then
     radarr_eventtype="Test"
@@ -29,7 +29,7 @@ fi
 if [[ ${radarr_eventtype} == "Test" ]]; then
     COLOR="16761392"
 
-    radarr_movie_tmdbid="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
+    radarr_movie_tmdbid="$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
 
     if [[ -n ${radarr_movie_tmdbid} ]]; then
         radarr_eventtype="Download"
@@ -43,7 +43,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
         "embeds":
             [
                 {
-                    "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                    "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "Test succeeded!",
                     "description": "We were able to send to your webhook without any problems. Below you should see a sample notification for the movie `tmdb:'${radarr_movie_tmdbid}'`.",
                     "color": "'${COLOR}'",
@@ -59,7 +59,7 @@ fi
 if [[ ${sonarr_eventtype} == "Test" ]]; then
     COLOR="2200501"
 
-    sonarr_series_tvdbid="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort -R | head -n 1)"
+    sonarr_series_tvdbid="$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort -R | head -n 1)"
 
     if [[ -n ${sonarr_series_tvdbid} ]]; then
         sonarr_eventtype="Download"
@@ -75,7 +75,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
         "embeds":
             [
                 {
-                    "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                    "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
                     "description": "We were able to send to your webhook without any problems. Below you should see 2 sample notifications for the tv show `tvdb:'${sonarr_series_tvdbid}'`.",
                     "color": "'${COLOR}'",
@@ -98,7 +98,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
 
         COLOR="16761392"; [[ ${radarr_isupgrade} == "True" ]] && COLOR="7105644"
 
-        movie="$(curl -fsSL --request GET "${HOST}:7878/api/v3/movie?tmdbId=${radarr_movie_tmdbid}&apikey=${API_KEY}")"
+        movie="$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/movie?tmdbId=${radarr_movie_tmdbid}&apikey=${API_KEY}")"
 
         # Poster
         movie_poster_field=""
@@ -228,7 +228,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
             "embeds":
                 [
                     {
-                        "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                        "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                         "title": "'${movie_title}' ('${movie_release_year}')",
                         "url": "https://www.themoviedb.org/movie/'${radarr_movie_tmdbid}'",
                         '${movie_poster_field}'
@@ -251,7 +251,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
                 "embeds":
                     [
                         {
-                            "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                            "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                             "title": "Failure!",
                             "description": "Something went wrong trying to send a notification for movie `tmdb:'${radarr_movie_tmdbid}'`.",
                             "color": "'${COLOR}'",
@@ -276,7 +276,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
 
         COLOR="2200501"; [[ ${sonarr_isupgrade} == "True" ]] && COLOR="7105644"
 
-        tvshow="$(curl -fsSL --request GET "${HOST}:8989/api/v3/series?tvdbId=${sonarr_series_tvdbid}&apikey=${API_KEY}")"
+        tvshow="$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/series?tvdbId=${sonarr_series_tvdbid}&apikey=${API_KEY}")"
         tvshow_id=$(echo "${tvshow}" | jq -r '.[].id')
 
         # Poster
@@ -338,8 +338,8 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
         IFS="${DEFAULTIFS}"
 
         for i in "${!episodes[@]}"; do
-            episode=$(curl -fsSL --request GET "${HOST}:8989/api/v3/episode?seriesId=${tvshow_id}&apikey=${API_KEY}" | jq -r ".[] | select(.seasonNumber==${sonarr_episodefile_seasonnumber}) | select(.episodeNumber==${episodes[i]})")
-            episode_file=$(curl -fsSL --request GET "${HOST}:8989/api/v3/episodefile?seriesId=${tvshow_id}&apikey=${API_KEY}" | jq -r ".[] | select(.id==$(echo "${episode}" | jq -r '.episodeFileId'))")
+            episode=$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/episode?seriesId=${tvshow_id}&apikey=${API_KEY}" | jq -r ".[] | select(.seasonNumber==${sonarr_episodefile_seasonnumber}) | select(.episodeNumber==${episodes[i]})")
+            episode_file=$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/episodefile?seriesId=${tvshow_id}&apikey=${API_KEY}" | jq -r ".[] | select(.id==$(echo "${episode}" | jq -r '.episodeFileId'))")
 
             # Air Date
             episode_airdate_field=""
@@ -443,7 +443,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                 "embeds":
                     [
                         {
-                            "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                            "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                             "title": "'${tvshow_title//([[:digit:]][[:digit:]][[:digit:]][[:digit:]])/}' ('${tvshow_release_year}') - S'$(printf "%02d" "${sonarr_episodefile_seasonnumber}")'E'$(printf "%02d" "${episodes[i]}")'",
                             "url": "http://www.thetvdb.com/?tab=series&id='${sonarr_series_tvdbid}'",
                             '${tvshow_poster_field}'
@@ -466,7 +466,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                     "embeds":
                         [
                             {
-                                "author": {"name": "'$HOSTNAME'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                                "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                                 "title": "Failure!",
                                 "description": "Something went wrong trying to send a notification for tv show `tvdb:'${sonarr_series_tvdbid}'`.",
                                 "color": "'${COLOR}'",
