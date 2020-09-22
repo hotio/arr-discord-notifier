@@ -149,6 +149,17 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
             fi
         fi
 
+        # Cast
+        movie_cast_field=""
+        if [[ ${drop_fields} != *cast* ]]; then
+            if [[ -n ${TMDB_API_KEY} ]]; then
+                movie_cast="$(curl -fsSL "https://api.themoviedb.org/3/movie/${radarr_movie_tmdbid}/credits?api_key=${TMDB_API_KEY}" | jq -r '.cast[].name' | head -n 8 | awk -vORS=', ' '{ print $0 }' | sed 's/, $/\n/')"
+                if [[ -n ${movie_cast} ]]; then
+                    movie_cast_field='{"name": "Cast", "value": "'${movie_cast}'"},'
+                fi
+            fi
+        fi
+
         # Quality
         movie_quality_field=""
         if [[ ${drop_fields} != *quality* ]]; then
@@ -219,7 +230,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
             fi
         fi
 
-        movie_fields="${movie_overview_field}${movie_rating_field}${movie_genres_field}${movie_quality_field}${movie_codecs_field}${movie_size_field}${movie_languages_field}${movie_subtitles_field}${movie_links_field}${movie_scene_name_field}"
+        movie_fields="${movie_overview_field}${movie_rating_field}${movie_genres_field}${movie_cast_field}${movie_quality_field}${movie_codecs_field}${movie_size_field}${movie_languages_field}${movie_subtitles_field}${movie_links_field}${movie_scene_name_field}"
         movie_fields=$(sed 's/,$//' <<< "${movie_fields}")
         [[ -n ${movie_fields} ]] && movie_fields=',"fields":['${movie_fields}']'
 
@@ -314,6 +325,20 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             tvshow_genres=$(echo "${tvshow}" | jq -r '.[].genres | join(", ")')
             if [[ ${tvshow_genres} != "null" ]] && [[ -n ${tvshow_genres} ]]; then
                 tvshow_genres_field='{"name": "Genres", "value": "'${tvshow_genres}'"},'
+            fi
+        fi
+
+        # Cast
+        tvshow_cast_field=""
+        if [[ ${drop_fields} != *cast* ]]; then
+            if [[ -n ${TMDB_API_KEY} ]]; then
+                tvshow_tmdbid="$(curl -fsSL "https://api.themoviedb.org/3/find/${sonarr_series_tvdbid}?api_key=${TMDB_API_KEY}&external_source=tvdb_id" | jq -r '.tv_results[0].id')"
+                if [[ ${tvshow_tmdbid} != null ]]; then
+                    tvshow_cast="$(curl -fsSL "https://api.themoviedb.org/3/tv/${tvshow_tmdbid}/credits?api_key=${TMDB_API_KEY}" | jq -r '.cast[].name' | head -n 8 | awk -vORS=', ' '{ print $0 }' | sed 's/, $/\n/')"
+                    if [[ -n ${tvshow_cast} ]]; then
+                        tvshow_cast_field='{"name": "Cast", "value": "'${tvshow_cast}'"},'
+                    fi
+                fi
             fi
         fi
 
@@ -434,7 +459,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                 fi
             fi
 
-            tvshow_fields="${episode_airdate_field}${episode_title_field}${episode_overview_field}${tvshow_rating_field}${tvshow_genres_field}${episode_quality_field}${episode_codecs_field}${episode_size_field}${episode_languages_field}${episode_subtitles_field}${tvshow_links_field}${episode_scene_name_field}"
+            tvshow_fields="${episode_airdate_field}${episode_title_field}${episode_overview_field}${tvshow_rating_field}${tvshow_genres_field}${tvshow_cast_field}${episode_quality_field}${episode_codecs_field}${episode_size_field}${episode_languages_field}${episode_subtitles_field}${tvshow_links_field}${episode_scene_name_field}"
             tvshow_fields=$(sed 's/,$//' <<< "${tvshow_fields}")
             [[ -n ${tvshow_fields} ]] && tvshow_fields=',"fields":['${tvshow_fields}']'
 
