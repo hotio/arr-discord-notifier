@@ -10,4 +10,6 @@ Then add the environment variable `DISCORD_WEBHOOK` with your webhook url provid
 
 If you also configure the environment variable `TMDB_API_KEY`, when possible it will use an episode still as a backdrop image. If you want to hide some fields, you can use `DROP_FIELDS="backdrop overview release airdate"` as a variable, all field names in lowercase, `backdrop` and `poster` are valid values.
 
+Sending to multiple webhooks can be done with additional variables like `DISCORD_WEBHOOK_0` and `DROP_FIELDS_0`.
+
 <img src="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/config.png" alt="Config Screenshot" width=600>
