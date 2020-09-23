@@ -493,7 +493,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                             {
                                 "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                                 "title": "Failure!",
-                                "description": "Something went wrong trying to send a notification for tv show `tvdb:'${sonarr_series_tvdbid}'`.",
+                                "description": "Something went wrong trying to send a notification for tv show `tvdb:'${sonarr_series_tvdbid}', s'${sonarr_episodefile_seasonnumber}'e'${episodes[i]}'`.",
                                 "color": "'${COLOR}'",
                                 "timestamp": "'${TIMESTAMP}'"
                             }
