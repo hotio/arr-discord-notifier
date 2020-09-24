@@ -48,7 +48,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
                     "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "Test succeeded!",
                     "description": "We were able to send to your webhook without any problems. Below you should see a sample notification for the movie `tmdb:'${radarr_movie_tmdbid}'`.",
-                    "color": "'${COLOR}'",
+                    "color": '${COLOR}',
                     "timestamp": "'${TIMESTAMP}'"
                 }
             ]
@@ -80,7 +80,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
                     "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
                     "description": "We were able to send to your webhook without any problems. Below you should see 2 sample notifications for the tv show `tvdb:'${sonarr_series_tvdbid}'`.",
-                    "color": "'${COLOR}'",
+                    "color": '${COLOR}',
                     "timestamp": "'${TIMESTAMP}'"
                 }
             ]
@@ -244,7 +244,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
                         "url": "https://www.themoviedb.org/movie/'${radarr_movie_tmdbid}'",
                         '${movie_poster_field}'
                         '${movie_backdrop_field}'
-                        "color": "'${COLOR}'",
+                        "color": '${COLOR}',
                         "timestamp": "'${TIMESTAMP}'"
                         '${movie_fields}'
                     }
@@ -267,7 +267,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
                             "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                             "title": "Failure!",
                             "description": "Something went wrong trying to send a notification for movie `tmdb:'${radarr_movie_tmdbid}'`.",
-                            "color": "'${COLOR}'",
+                            "color": '${COLOR}',
                             "timestamp": "'${TIMESTAMP}'"
                         }
                     ]
@@ -473,7 +473,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                             "url": "http://www.thetvdb.com/?tab=series&id='${sonarr_series_tvdbid}'",
                             '${tvshow_poster_field}'
                             '${tvshow_backdrop_field}'
-                            "color": "'${COLOR}'",
+                            "color": "'${COLOR}',
                             "timestamp": "'${TIMESTAMP}'"
                             '${tvshow_fields}'
                         }
@@ -496,7 +496,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                                 "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                                 "title": "Failure!",
                                 "description": "Something went wrong trying to send a notification for tv show `tvdb:'${sonarr_series_tvdbid}', s'${sonarr_episodefile_seasonnumber}'e'${episodes[i]}'`.",
-                                "color": "'${COLOR}'",
+                                "color": '${COLOR}',
                                 "timestamp": "'${TIMESTAMP}'"
                             }
                         ]
