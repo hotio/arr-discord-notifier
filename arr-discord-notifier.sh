@@ -1,5 +1,7 @@
 #!/bin/bash
 
+global_exit_code=0
+
 PrettyPrintSize() {
     if [[ $1 -lt 1024 ]]; then
         printf "%0.2f B" "$(echo "${1}" | awk '{print $1}')"
@@ -123,11 +125,9 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
         # Overview
         movie_overview_field=""
         if [[ ${drop_fields} != *overview* ]]; then
-            movie_overview=$(echo "${movie}" | jq -r '.[].overview')
+            movie_overview=$(echo "${movie}" | jq '.[].overview')
             if [[ ${movie_overview} != "null" ]] && [[ -n ${movie_overview} ]]; then
-                movie_overview=${movie_overview//\"/\'}
-                [[ ${#movie_overview} -gt 300 ]] && dots="..."
-                movie_overview_field='{"name": "Overview", "value": "'${movie_overview:0:300}${dots}'"},'
+                movie_overview_field='{"name": "Overview", "value": '${movie_overview}'},'
             fi
         fi
 
@@ -252,9 +252,9 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
         }
         '
         curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${webhook_url}"
-        result=$?
+        exit_code=$?
 
-        if [[ ${result} -gt 0 ]]; then
+        if [[ ${exit_code} -gt 0 ]]; then
             COLOR="15746887"
 
             json='
@@ -272,6 +272,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
             }
             '
             curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${webhook_url}"
+            global_exit_code=$((global_exit_code + exit_code))
         fi
 
     done < <(printf '%s\n' "$webhooks")
@@ -376,21 +377,18 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             # Title
             episode_title_field=""
             if [[ ${drop_fields} != *title* ]]; then
-                episode_title=$(echo "${episode}" | jq -r '.title')
+                episode_title=$(echo "${episode}" | jq '.title')
                 if [[ ${episode_title} != "null" ]] && [[ -n ${episode_title} ]]; then
-                    episode_title=${episode_title//\"/\'}
-                    episode_title_field='{"name": "Title", "value": "'${episode_title}'"},'
+                    episode_title_field='{"name": "Title", "value": '${episode_title}'},'
                 fi
             fi
 
             # Overview
             episode_overview_field=""
             if [[ ${drop_fields} != *overview* ]]; then
-                episode_overview=$(echo "${episode}" | jq -r '.overview')
+                episode_overview=$(echo "${episode}" | jq '.overview')
                 if [[ ${episode_overview} != "null" ]] && [[ -n ${episode_overview} ]]; then
-                    episode_overview=${episode_overview//\"/\'}
-                    [[ ${#episode_overview} -gt 300 ]] && dots="..."
-                    episode_overview_field='{"name": "Overview", "value": "'${episode_overview:0:300}${dots}'"},'
+                    episode_overview_field='{"name": "Overview", "value": '${episode_overview}'},'
                 fi
             fi
 
@@ -481,9 +479,9 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             }
             '
             curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${webhook_url}"
-            result=$?
+            exit_code=$?
 
-            if [[ ${result} -gt 0 ]]; then
+            if [[ ${exit_code} -gt 0 ]]; then
                 COLOR="15746887"
 
                 json='
@@ -501,6 +499,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                 }
                 '
                 curl -fsSL -X POST -H "Content-Type: application/json" -d "${json}" "${webhook_url}"
+                global_exit_code=$((global_exit_code + exit_code))
             fi
 
             sleep 5
@@ -508,3 +507,5 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
 
     done < <(printf '%s\n' "$webhooks")
 fi
+
+exit ${global_exit_code}
