@@ -255,6 +255,8 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
         exit_code=$?
 
         if [[ ${exit_code} -gt 0 ]]; then
+            >&2 echo "Something went wrong trying to send a notification for movie tmdb:${radarr_movie_tmdbid}."
+            >&2 echo "${json}"
             COLOR="15746887"
 
             json='
@@ -482,6 +484,8 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             exit_code=$?
 
             if [[ ${exit_code} -gt 0 ]]; then
+                >&2 echo "Something went wrong trying to send a notification for tv show tvdb:${sonarr_series_tvdbid}, s${sonarr_episodefile_seasonnumber}e${episodes[i]}."
+                >&2 echo "${json}"
                 COLOR="15746887"
 
                 json='
