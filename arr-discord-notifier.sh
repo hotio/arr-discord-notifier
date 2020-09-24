@@ -473,7 +473,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                             "url": "http://www.thetvdb.com/?tab=series&id='${sonarr_series_tvdbid}'",
                             '${tvshow_poster_field}'
                             '${tvshow_backdrop_field}'
-                            "color": "'${COLOR}',
+                            "color": '${COLOR}',
                             "timestamp": "'${TIMESTAMP}'"
                             '${tvshow_fields}'
                         }
