@@ -127,6 +127,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
         if [[ ${drop_fields} != *overview* ]]; then
             movie_overview=$(echo "${movie}" | jq '.[].overview')
             if [[ ${movie_overview} != "null" ]] && [[ -n ${movie_overview} ]]; then
+                [[ ${#movie_overview} -gt 1026 ]] && movie_overview=${movie_overview:0:1022}'..."'
                 movie_overview_field='{"name": "Overview", "value": '${movie_overview}'},'
             fi
         fi
@@ -390,6 +391,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
             if [[ ${drop_fields} != *overview* ]]; then
                 episode_overview=$(echo "${episode}" | jq '.overview')
                 if [[ ${episode_overview} != "null" ]] && [[ -n ${episode_overview} ]]; then
+                    [[ ${#episode_overview} -gt 1026 ]] && episode_overview=${episode_overview:0:1022}'..."'
                     episode_overview_field='{"name": "Overview", "value": '${episode_overview}'},'
                 fi
             fi
