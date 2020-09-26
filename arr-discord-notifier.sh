@@ -18,7 +18,7 @@ PrettyPrintSize() {
 [[ -z ${API_KEY} ]]     && >&2 echo "No API_KEY could be found!" && exit 1
 [[ -z ${API_HOST} ]]    && API_HOST=localhost
 [[ -z ${AUTHOR_NAME} ]] && AUTHOR_NAME=${HOSTNAME}
-[[ -z ${TIMESTAMP} ]]   && TIMESTAMP=$(date -u --iso-8601=seconds)
+[[ -z ${TIMESTAMP} ]]   && TIMESTAMP=$(date -u +'%FT%T.%3NZ')
 
 if [[ ${1} == "Radarr" ]]; then
     radarr_eventtype="Test"
