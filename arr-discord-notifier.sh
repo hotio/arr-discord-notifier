@@ -45,7 +45,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
         "embeds":
             [
                 {
-                    "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                    "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                     "title": "Test succeeded!",
                     "description": "We were able to send to your webhook without any problems. Below you should see a sample notification for the movie `tmdb:'${radarr_movie_tmdbid}'`.",
                     "color": '${COLOR}',
@@ -77,7 +77,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
         "embeds":
             [
                 {
-                    "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                    "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                     "title": "Test succeeded!",
                     "description": "We were able to send to your webhook without any problems. Below you should see 2 sample notifications for the tv show `tvdb:'${sonarr_series_tvdbid}'`.",
                     "color": '${COLOR}',
@@ -106,16 +106,16 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
         movie_poster_field=""
         if [[ ${drop_fields} != *poster* ]]; then
             movie_poster=$(echo "${movie}" | jq -r '.[].images[] | select(.coverType=="poster") | .remoteUrl')
-            [[ -z ${movie_poster} ]] && movie_poster="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/poster.png"
-            movie_poster_field='"thumbnail": {"url": "'${movie_poster}'"},'
+            [[ -z ${movie_poster} ]] && movie_poster="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/poster.png"
+            grep "http" <<< ${movie_poster} && movie_poster_field='"thumbnail": {"url": "'${movie_poster}'"},'
         fi
 
         # Backdrop
         movie_backdrop_field=""
         if [[ ${drop_fields} != *backdrop* ]]; then
             movie_backdrop=$(echo "${movie}" | jq -r '.[].images[] | select(.coverType=="fanart") | .remoteUrl' | sed s/original/w500/)
-            [[ -z ${movie_backdrop} ]] && movie_backdrop="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/backdrop.png"
-            movie_backdrop_field='"image": {"url": "'${movie_backdrop}'"},'
+            [[ -z ${movie_backdrop} ]] && movie_backdrop="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/backdrop.png"
+            grep "http" <<< ${movie_backdrop} && movie_backdrop_field='"image": {"url": "'${movie_backdrop}'"},'
         fi
 
         # Movie Name (Year)
@@ -240,7 +240,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
             "embeds":
                 [
                     {
-                        "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                        "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                         "title": "'${movie_title}' ('${movie_release_year}')",
                         "url": "https://www.themoviedb.org/movie/'${radarr_movie_tmdbid}'",
                         '${movie_poster_field}'
@@ -265,7 +265,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
                 "embeds":
                     [
                         {
-                            "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/radarr/logo.png"},
+                            "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                             "title": "Failure!",
                             "description": "Something went wrong trying to send a notification for movie `tmdb:'${radarr_movie_tmdbid}'`.",
                             "color": '${COLOR}',
@@ -298,16 +298,16 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
         tvshow_poster_field=""
         if [[ ${drop_fields} != *poster* ]]; then
             tvshow_poster=$(echo "${tvshow}" | jq -r '.[].images[] | select(.coverType=="poster") | .remoteUrl')
-            [[ -z ${tvshow_poster} ]] && tvshow_poster="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/poster.png"
-            tvshow_poster_field='"thumbnail": {"url": "'${tvshow_poster}'"},'
+            [[ -z ${tvshow_poster} ]] && tvshow_poster="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/poster.png"
+            grep "http" <<< ${tvshow_poster} && tvshow_poster_field='"thumbnail": {"url": "'${tvshow_poster}'"},'
         fi
 
         # Backdrop
         tvshow_backdrop_field=""
         if [[ ${drop_fields} != *backdrop* ]]; then
             tvshow_backdrop=$(echo "${tvshow}" | jq -r '.[].images[] | select(.coverType=="fanart") | .remoteUrl' | sed s/.jpg/_t.jpg/)
-            [[ -z ${tvshow_backdrop} ]] && tvshow_backdrop="https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/backdrop.png"
-            tvshow_backdrop_field='"image": {"url": "'${tvshow_backdrop}'"},'
+            [[ -z ${tvshow_backdrop} ]] && tvshow_backdrop="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/backdrop.png"
+            grep "http" <<< ${tvshow_backdrop} && tvshow_backdrop_field='"image": {"url": "'${tvshow_backdrop}'"},'
         fi
 
         # TV Show Name (Year)
@@ -470,7 +470,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                 "embeds":
                     [
                         {
-                            "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                            "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                             "title": "'${tvshow_title//([[:digit:]][[:digit:]][[:digit:]][[:digit:]])/}' ('${tvshow_release_year}') - S'$(printf "%02d" "${sonarr_episodefile_seasonnumber}")'E'$(printf "%02d" "${episodes[i]}")'",
                             "url": "http://www.thetvdb.com/?tab=series&id='${sonarr_series_tvdbid}'",
                             '${tvshow_poster_field}'
@@ -495,7 +495,7 @@ if [[ ${sonarr_eventtype} == "Download" ]]; then
                     "embeds":
                         [
                             {
-                                "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
+                                "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                                 "title": "Failure!",
                                 "description": "Something went wrong trying to send a notification for tv show `tvdb:'${sonarr_series_tvdbid}', s'${sonarr_episodefile_seasonnumber}'e'${episodes[i]}'`.",
                                 "color": '${COLOR}',
