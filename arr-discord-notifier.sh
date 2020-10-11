@@ -28,7 +28,7 @@ if [[ ${1} == "Sonarr" ]]; then
     sonarr_eventtype="Test"
 fi
 
-if [[ ${radarr_eventtype} == "Test" ]]; then
+if [[ ${radarr_eventtype^^} == "TEST" ]]; then
     COLOR="16761392"
 
     radarr_movie_tmdbid="$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
@@ -58,7 +58,7 @@ if [[ ${radarr_eventtype} == "Test" ]]; then
 
 fi
 
-if [[ ${sonarr_eventtype} == "Test" ]]; then
+if [[ ${sonarr_eventtype^^} == "TEST" ]]; then
     COLOR="2200501"
 
     sonarr_series_tvdbid="$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort -R | head -n 1)"
@@ -90,7 +90,7 @@ if [[ ${sonarr_eventtype} == "Test" ]]; then
 
 fi
 
-if [[ ${radarr_eventtype} == "Download" ]]; then
+if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
     webhooks=$(env | grep "DISCORD_WEBHOOK")
 
     while IFS= read -r DISCORD_WEBHOOK; do
@@ -281,7 +281,7 @@ if [[ ${radarr_eventtype} == "Download" ]]; then
     done < <(printf '%s\n' "$webhooks")
 fi
 
-if [[ ${sonarr_eventtype} == "Download" ]]; then
+if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
     webhooks=$(env | grep "DISCORD_WEBHOOK")
 
     while IFS= read -r DISCORD_WEBHOOK; do
