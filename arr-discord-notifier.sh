@@ -101,6 +101,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         COLOR="16761392"; [[ ${radarr_isupgrade} == "True" ]] && COLOR="7105644"
 
         movie="$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/movie?tmdbId=${radarr_movie_tmdbid}&apikey=${API_KEY}")"
+        movie_id=$(echo "${movie}" | jq -r '.[].id')
 
         # Poster
         movie_poster_field=""
@@ -153,11 +154,9 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         # Cast
         movie_cast_field=""
         if [[ ${drop_fields} != *cast* ]]; then
-            if [[ -n ${TMDB_API_KEY} ]]; then
-                movie_cast="$(curl -fsSL "https://api.themoviedb.org/3/movie/${radarr_movie_tmdbid}/credits?api_key=${TMDB_API_KEY}" | jq -r '.cast[].name' | head -n 8 | awk -vORS=', ' '{ print $0 }' | sed 's/, $/\n/')"
-                if [[ -n ${movie_cast} ]]; then
-                    movie_cast_field='{"name": "Cast", "value": "'${movie_cast}'"},'
-                fi
+            movie_cast=$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/credit?movieId=${movie_id}&apikey=${API_KEY}" | jq -r '.[] | select(.type=="cast") | .personName' | head -n 8 | awk -vORS=', ' '{ print $0 }' | sed 's/, $/\n/')
+            if [[ -n ${movie_cast} ]]; then
+                movie_cast_field='{"name": "Cast", "value": "'${movie_cast}'"},'
             fi
         fi
 
