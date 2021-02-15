@@ -14,7 +14,7 @@ PrettyPrintSize() {
     fi
 }
 
-[[ -z ${API_KEY} ]]     && API_KEY=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "${CONFIG_DIR}/app/config.xml")
+[[ -z ${API_KEY} ]]     && API_KEY=$(grep -oPm1 "(?<=<ApiKey>)[^<]+" "${CONFIG_DIR}/config.xml")
 [[ -z ${API_KEY} ]]     && >&2 echo "No API_KEY could be found!" && exit 1
 [[ -z ${API_HOST} ]]    && API_HOST=localhost
 [[ -z ${AUTHOR_NAME} ]] && AUTHOR_NAME=${HOSTNAME}
