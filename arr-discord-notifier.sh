@@ -122,6 +122,8 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         # Movie Name (Year)
         movie_title=$(echo "${movie}" | jq -r '.[].title')
         movie_release_year=$(echo "${movie}" | jq -r '.[].year')
+
+        # URL
         if [[ -z ${EXTERNAL_URL} ]]; then
             movie_url="https://www.themoviedb.org/movie/${radarr_movie_tmdbid}"
         else
@@ -319,11 +321,13 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
         # TV Show Name (Year)
         tvshow_title=$(echo "${tvshow}" | jq -r '.[].title')
         tvshow_release_year=$(echo "${tvshow}" | jq -r '.[].year')
+
+        # URL
         if [[ -z ${EXTERNAL_URL} ]]; then
             tvshow_url="http://www.thetvdb.com/?tab=series&id=${sonarr_series_tvdbid}"
         else
-            tvshow_slug="$(curl -fsSL "https://skyhook.sonarr.tv/v1/tvdb/shows/en/${sonarr_series_tvdbid}" | jq -r '.slug')"
-            tvshow_url="${EXTERNAL_URL}/series/${tvshow_slug}"
+            tvshow_title_slug=$(echo "${tvshow}" | jq -r '.[].titleSlug')
+            tvshow_url="${EXTERNAL_URL}/series/${tvshow_title_slug}"
         fi
 
         # Rating
