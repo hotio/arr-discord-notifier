@@ -169,7 +169,9 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         movie_quality_field=""
         if [[ ${drop_fields} != *quality* ]]; then
             movie_quality=$(echo "${movie}" | jq -r '.[].movieFile.quality.quality.name')
-            movie_quality_field='{"name": "Quality", "value": "'${movie_quality}'", "inline": true},'
+            if [[ ${movie_quality} != "null" ]] && [[ -n ${movie_quality} ]]; then
+                movie_quality_field='{"name": "Quality", "value": "'${movie_quality}'", "inline": true},'
+            fi
         fi
 
         # Codecs
@@ -410,7 +412,9 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
             episode_quality_field=""
             if [[ ${drop_fields} != *quality* ]]; then
                 episode_quality=$(echo "${episode_file}" | jq -r '.quality.quality.name')
-                episode_quality_field='{"name": "Quality", "value": "'${episode_quality}'", "inline": true},'
+                if [[ ${episode_quality} != "null" ]] && [[ -n ${episode_quality} ]]; then
+                    episode_quality_field='{"name": "Quality", "value": "'${episode_quality}'", "inline": true},'
+                fi
             fi
 
             # Codecs
