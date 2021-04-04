@@ -122,6 +122,11 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         # Movie Name (Year)
         movie_title=$(echo "${movie}" | jq -r '.[].title')
         movie_release_year=$(echo "${movie}" | jq -r '.[].year')
+        if [[ -z ${EXTERNAL_URL} ]]; then
+            movie_url="https://www.themoviedb.org/movie/${radarr_movie_tmdbid}"
+        else
+            movie_url="${EXTERNAL_URL}/movie/${radarr_movie_tmdbid}"
+        fi
 
         # Overview
         movie_overview_field=""
@@ -241,7 +246,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
                     {
                         "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/logo.png"},
                         "title": "'${movie_title}' ('${movie_release_year}')",
-                        "url": "https://www.themoviedb.org/movie/'${radarr_movie_tmdbid}'",
+                        "url": "'${movie_url}'",
                         '${movie_poster_field}'
                         '${movie_backdrop_field}'
                         "color": '${COLOR}',
@@ -312,6 +317,12 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
         # TV Show Name (Year)
         tvshow_title=$(echo "${tvshow}" | jq -r '.[].title')
         tvshow_release_year=$(echo "${tvshow}" | jq -r '.[].year')
+        if [[ -z ${EXTERNAL_URL} ]]; then
+            tvshow_url="http://www.thetvdb.com/?tab=series&id=${sonarr_series_tvdbid}"
+        else
+            tvshow_slug="$(curl -fsSL "https://skyhook.sonarr.tv/v1/tvdb/shows/en/${sonarr_series_tvdbid}" | jq -r '.slug')"
+            tvshow_url="${EXTERNAL_URL}/series/${tvshow_slug}"
+        fi
 
         # Rating
         tvshow_rating_field=""
@@ -471,7 +482,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
                         {
                             "author": {"name": "'${AUTHOR_NAME}'", "icon_url": "https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/logo.png"},
                             "title": "'${tvshow_title//([[:digit:]][[:digit:]][[:digit:]][[:digit:]])/}' ('${tvshow_release_year}') - S'$(printf "%02d" "${sonarr_episodefile_seasonnumber}")'E'$(printf "%02d" "${episodes[i]}")'",
-                            "url": "http://www.thetvdb.com/?tab=series&id='${sonarr_series_tvdbid}'",
+                            "url": "'${tvshow_url}'",
                             '${tvshow_poster_field}'
                             '${tvshow_backdrop_field}'
                             "color": '${COLOR}',
