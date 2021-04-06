@@ -193,12 +193,12 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
             movie_size_field='{"name": "Size", "value": "'${movie_size}'", "inline": true},'
         fi
 
-        # Languages
+        # Audio Languages
         movie_languages_field=""
-        if [[ ${drop_fields} != *languages* ]]; then
+        if [[ ${drop_fields} != *languages* ]] && [[ ${drop_fields} != *audio* ]]; then
             movie_languages=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioLanguages')
             if [[ ${movie_languages} != "null" ]] && [[ -n ${movie_languages} ]]; then
-                movie_languages_field='{"name": "Languages", "value": "'${movie_languages}'"},'
+                movie_languages_field='{"name": "Audio", "value": "'${movie_languages}'", "inline": true},'
             fi
         fi
 
@@ -207,7 +207,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         if [[ ${drop_fields} != *subtitles* ]]; then
             movie_subtitles=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.subtitles')
             if [[ ${movie_subtitles} != "null" ]] && [[ -n ${movie_subtitles} ]]; then
-                movie_subtitles_field='{"name": "Subtitles", "value": "'${movie_subtitles}'"},'
+                movie_subtitles_field='{"name": "Subtitles", "value": "'${movie_subtitles}'", "inline": true},'
             fi
         fi
 
@@ -438,12 +438,12 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
                 episode_size_field='{"name": "Size", "value": "'${episode_size}'", "inline": true},'
             fi
 
-            # Languages
+            # Audio Languages
             episode_languages_field=""
-            if [[ ${drop_fields} != *languages* ]]; then
+            if [[ ${drop_fields} != *languages* ]] && [[ ${drop_fields} != *audio* ]]; then
                 episode_languages=$(echo "${episode_file}" | jq -r '.mediaInfo.audioLanguages')
                 if [[ ${episode_languages} != "null" ]] && [[ -n ${episode_languages} ]]; then
-                    episode_languages_field='{"name": "Languages", "value": "'${episode_languages}'"},'
+                    episode_languages_field='{"name": "Audio", "value": "'${episode_languages}'", "inline": true},'
                 fi
             fi
 
@@ -452,7 +452,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
             if [[ ${drop_fields} != *subtitles* ]]; then
                 episode_subtitles=$(echo "${episode_file}" | jq -r '.mediaInfo.subtitles')
                 if [[ ${episode_subtitles} != "null" ]] && [[ -n ${episode_subtitles} ]]; then
-                    episode_subtitles_field='{"name": "Subtitles", "value": "'${episode_subtitles}'"},'
+                    episode_subtitles_field='{"name": "Subtitles", "value": "'${episode_subtitles}'", "inline": true},'
                 fi
             fi
 
