@@ -91,7 +91,7 @@ if [[ ${sonarr_eventtype^^} == "TEST" ]]; then
 fi
 
 if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
-    webhooks=$(env | grep "DISCORD_WEBHOOK")
+    webhooks=$(env | grep "^DISCORD_WEBHOOK")
 
     while IFS= read -r DISCORD_WEBHOOK; do
         webhook_url=$(sed "s#DISCORD_WEBHOOK.*=##" <<< "${DISCORD_WEBHOOK}")
@@ -290,7 +290,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 fi
 
 if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
-    webhooks=$(env | grep "DISCORD_WEBHOOK")
+    webhooks=$(env | grep "^DISCORD_WEBHOOK")
 
     while IFS= read -r DISCORD_WEBHOOK; do
         webhook_url=$(sed "s#DISCORD_WEBHOOK.*=##" <<< "${DISCORD_WEBHOOK}")
