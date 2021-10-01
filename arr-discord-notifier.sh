@@ -31,7 +31,7 @@ fi
 if [[ ${radarr_eventtype^^} == "TEST" ]]; then
     COLOR="16761392"
 
-    radarr_movie_tmdbid="$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort | head -n 1)"
+    radarr_movie_tmdbid="$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/movie?apikey=${API_KEY}" | jq -r '.[] | select(.hasFile==true) | .tmdbId' | sort -R | head -n 1)"
 
     if [[ -n ${radarr_movie_tmdbid} ]]; then
         radarr_eventtype="Download"
@@ -61,7 +61,7 @@ fi
 if [[ ${sonarr_eventtype^^} == "TEST" ]]; then
     COLOR="2200501"
 
-    sonarr_series_tvdbid="$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort | head -n 1)"
+    sonarr_series_tvdbid="$(curl -fsSL --request GET "${API_HOST}:8989/api/v3/series?apikey=${API_KEY}" | jq -r '.[] | select(.statistics.episodeFileCount>2) | select(.statistics.percentOfEpisodes==100) | .tvdbId' | sort -R | head -n 1)"
 
     if [[ -n ${sonarr_series_tvdbid} ]]; then
         sonarr_eventtype="Download"
