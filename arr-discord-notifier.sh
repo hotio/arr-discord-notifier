@@ -105,7 +105,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Poster
         movie_poster_field=""
-        if [[ ${drop_fields} != *poster* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<poster\>') ]]; then
             movie_poster=$(echo "${movie}" | jq -r '.[].images[] | select(.coverType=="poster") | .remoteUrl')
             [[ -z ${movie_poster} ]] && movie_poster="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/poster.png"
             grep "http" <<< ${movie_poster} && movie_poster_field='"thumbnail": {"url": "'${movie_poster}'"},'
@@ -113,7 +113,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Backdrop
         movie_backdrop_field=""
-        if [[ ${drop_fields} != *backdrop* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<backdrop\>') ]]; then
             movie_backdrop=$(echo "${movie}" | jq -r '.[].images[] | select(.coverType=="fanart") | .remoteUrl' | sed s/original/w500/)
             [[ -z ${movie_backdrop} ]] && movie_backdrop="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/radarr/backdrop.png"
             grep "http" <<< ${movie_backdrop} && movie_backdrop_field='"image": {"url": "'${movie_backdrop}'"},'
@@ -132,7 +132,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Overview
         movie_overview_field=""
-        if [[ ${drop_fields} != *overview* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<overview\>') ]]; then
             movie_overview=$(echo "${movie}" | jq '.[].overview')
             if [[ ${movie_overview} != "null" ]] && [[ -n ${movie_overview} ]]; then
                 [[ ${#movie_overview} -gt 1026 ]] && movie_overview=${movie_overview:0:1022}'..."'
@@ -142,7 +142,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Rating
         movie_rating_field=""
-        if [[ ${drop_fields} != *rating* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<rating\>') ]]; then
             movie_rating=$(echo "${movie}" | jq -r '.[].ratings.value')
             if [[ ${movie_rating} != "0" ]] && [[ -n ${movie_rating} ]]; then
                 movie_rating_field='{"name": "Rating", "value": "'${movie_rating}'"},'
@@ -151,7 +151,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Genres
         movie_genres_field=""
-        if [[ ${drop_fields} != *genres* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<genres\>') ]]; then
             movie_genres=$(echo "${movie}" | jq -r '.[].genres | join(", ")')
             if [[ ${movie_genres} != "null" ]] && [[ -n ${movie_genres} ]]; then
                 movie_genres_field='{"name": "Genres", "value": "'${movie_genres}'"},'
@@ -160,7 +160,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Cast
         movie_cast_field=""
-        if [[ ${drop_fields} != *cast* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<cast\>') ]]; then
             movie_cast=$(curl -fsSL --request GET "${API_HOST}:7878/api/v3/credit?movieId=${movie_id}&apikey=${API_KEY}" | jq -r '.[] | select(.type=="cast") | .personName' | head -n 8 | awk -vORS=', ' '{ print $0 }' | sed 's/, $/\n/')
             if [[ -n ${movie_cast} ]]; then
                 movie_cast_field='{"name": "Cast", "value": "'${movie_cast}'"},'
@@ -169,7 +169,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Quality
         movie_quality_field=""
-        if [[ ${drop_fields} != *quality* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<quality\>') ]]; then
             movie_quality=$(echo "${movie}" | jq -r '.[].movieFile.quality.quality.name')
             if [[ ${movie_quality} != "null" ]] && [[ -n ${movie_quality} ]]; then
                 movie_quality_field='{"name": "Quality", "value": "'${movie_quality}'", "inline": true},'
@@ -178,7 +178,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Codecs
         movie_codecs_field=""
-        if [[ ${drop_fields} != *codecs* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<codecs\>') ]]; then
             movie_video=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.videoCodec')
             movie_audio="$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioCodec') $(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioChannels')"
             if [[ ${movie_video} != "null" ]] && [[ -n ${movie_video} ]]; then
@@ -188,14 +188,14 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Size
         movie_size_field=""
-        if [[ ${drop_fields} != *size* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<size\>') ]]; then
             movie_size=$(PrettyPrintSize "$(echo "${movie}" | jq -r '.[].movieFile.size')")
             movie_size_field='{"name": "Size", "value": "'${movie_size}'", "inline": true},'
         fi
 
         # Audio Languages
         movie_languages_field=""
-        if [[ ${drop_fields} != *languages* ]] && [[ ${drop_fields} != *audio* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<languages\>') ]] && ! [[ $drop_fields =~ $(echo '\<audio\>') ]]; then
             movie_languages=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.audioLanguages')
             if [[ ${movie_languages} != "null" ]] && [[ -n ${movie_languages} ]]; then
                 movie_languages_field='{"name": "Audio", "value": "'${movie_languages}'", "inline": true},'
@@ -204,7 +204,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Subtitles
         movie_subtitles_field=""
-        if [[ ${drop_fields} != *subtitles* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<subtitles\>') ]]; then
             movie_subtitles=$(echo "${movie}" | jq -r '.[].movieFile.mediaInfo.subtitles')
             if [[ ${movie_subtitles} != "null" ]] && [[ -n ${movie_subtitles} ]]; then
                 movie_subtitles_field='{"name": "Subtitles", "value": "'${movie_subtitles}'", "inline": true},'
@@ -213,7 +213,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Links
         movie_links_field=""
-        if [[ ${drop_fields} != *links* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<links\>') ]]; then
             movie_links="[TMDb](https://www.themoviedb.org/movie/${radarr_movie_tmdbid}) / [Trakt](https://trakt.tv/search/tmdb/${radarr_movie_tmdbid}?id_type=movie)"
             movie_link_imdb=$(echo "${movie}" | jq -r '.[].imdbId')
             if [[ ${movie_link_imdb} != "null" ]] && [[ -n ${movie_link_imdb} ]]; then
@@ -232,7 +232,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Release
         movie_scene_name_field=""
-        if [[ ${drop_fields} != *release* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<release\>') ]]; then
             movie_scene_name=$(echo "${movie}" | jq -r '.[].movieFile.sceneName')
             if [[ ${movie_scene_name} != "null" ]] && [[ -n ${movie_scene_name} ]]; then
                 movie_scene_name_field='{"name": "Release", "value": "```'${movie_scene_name}'```"},'
@@ -304,7 +304,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Poster
         tvshow_poster_field=""
-        if [[ ${drop_fields} != *poster* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<poster\>') ]]; then
             tvshow_poster=$(echo "${tvshow}" | jq -r '.[].images[] | select(.coverType=="poster") | .remoteUrl')
             [[ -z ${tvshow_poster} ]] && tvshow_poster="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/poster.png"
             grep "http" <<< ${tvshow_poster} && tvshow_poster_field='"thumbnail": {"url": "'${tvshow_poster}'"},'
@@ -312,7 +312,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Backdrop
         tvshow_backdrop_field=""
-        if [[ ${drop_fields} != *backdrop* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<backdrop\>') ]]; then
             tvshow_backdrop=$(echo "${tvshow}" | jq -r '.[].images[] | select(.coverType=="fanart") | .remoteUrl' | sed s/.jpg/_t.jpg/)
             [[ -z ${tvshow_backdrop} ]] && tvshow_backdrop="https://raw.githubusercontent.com/docker-hotio/arr-discord-notifier/master/img/sonarr/backdrop.png"
             grep "http" <<< ${tvshow_backdrop} && tvshow_backdrop_field='"image": {"url": "'${tvshow_backdrop}'"},'
@@ -332,7 +332,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Rating
         tvshow_rating_field=""
-        if [[ ${drop_fields} != *rating* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<rating\>') ]]; then
             tvshow_rating=$(echo "${tvshow}" | jq -r '.[].ratings.value')
             if [[ ${tvshow_rating} != "0" ]] && [[ -n ${tvshow_rating} ]]; then
                 tvshow_rating_field='{"name": "Rating", "value": "'${tvshow_rating}'"},'
@@ -341,7 +341,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Genres
         tvshow_genres_field=""
-        if [[ ${drop_fields} != *genres* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<genres\>') ]]; then
             tvshow_genres=$(echo "${tvshow}" | jq -r '.[].genres | join(", ")')
             if [[ ${tvshow_genres} != "null" ]] && [[ -n ${tvshow_genres} ]]; then
                 tvshow_genres_field='{"name": "Genres", "value": "'${tvshow_genres}'"},'
@@ -350,7 +350,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Cast
         tvshow_cast_field=""
-        if [[ ${drop_fields} != *cast* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<cast\>') ]]; then
             if [[ -n ${TMDB_API_KEY} ]]; then
                 tvshow_tmdbid="$(curl -fsSL "https://api.themoviedb.org/3/find/${sonarr_series_tvdbid}?api_key=${TMDB_API_KEY}&external_source=tvdb_id" | jq -r '.tv_results[0].id')"
                 if [[ ${tvshow_tmdbid} != null ]]; then
@@ -364,7 +364,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
         # Links
         tvshow_links_field=""
-        if [[ ${drop_fields} != *links* ]]; then
+        if ! [[ $drop_fields =~ $(echo '\<links\>') ]]; then
             tvshow_links="[TVDb](http://www.thetvdb.com/?tab=series&id=${sonarr_series_tvdbid}) / [Trakt](http://trakt.tv/search/tvdb/${sonarr_series_tvdbid}?id_type=show)"
             tvshow_link_imdb=$(echo "${tvshow}" | jq -r '.[].imdbId')
             if [[ ${tvshow_link_imdb} != "null" ]] && [[ -n ${tvshow_link_imdb} ]]; then
@@ -388,14 +388,14 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Air Date
             episode_airdate_field=""
-            if [[ ${drop_fields} != *airdate* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<airdate\>') ]]; then
                 episode_airdate=$(echo "${episode}" | jq -r '.airDate')
                 episode_airdate_field='{"name": "Air Date", "value": "'${episode_airdate}'"},'
             fi
 
             # Title
             episode_title_field=""
-            if [[ ${drop_fields} != *title* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<title\>') ]]; then
                 episode_title=$(echo "${episode}" | jq '.title')
                 if [[ ${episode_title} != "null" ]] && [[ -n ${episode_title} ]]; then
                     episode_title_field='{"name": "Title", "value": '${episode_title}'},'
@@ -404,7 +404,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Overview
             episode_overview_field=""
-            if [[ ${drop_fields} != *overview* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<overview\>') ]]; then
                 episode_overview=$(echo "${episode}" | jq '.overview')
                 if [[ ${episode_overview} != "null" ]] && [[ -n ${episode_overview} ]]; then
                     [[ ${#episode_overview} -gt 1026 ]] && episode_overview=${episode_overview:0:1022}'..."'
@@ -414,7 +414,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Quality
             episode_quality_field=""
-            if [[ ${drop_fields} != *quality* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<quality\>') ]]; then
                 episode_quality=$(echo "${episode_file}" | jq -r '.quality.quality.name')
                 if [[ ${episode_quality} != "null" ]] && [[ -n ${episode_quality} ]]; then
                     episode_quality_field='{"name": "Quality", "value": "'${episode_quality}'", "inline": true},'
@@ -423,7 +423,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Codecs
             episode_codecs_field=""
-            if [[ ${drop_fields} != *codecs* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<codecs\>') ]]; then
                 episode_video=$(echo "${episode_file}" | jq -r '.mediaInfo.videoCodec')
                 episode_audio="$(echo "${episode_file}" | jq -r '.mediaInfo.audioCodec') $(echo "${episode_file}" | jq -r '.mediaInfo.audioChannels')"
                 if [[ ${episode_video} != "null" ]] && [[ -n ${episode_video} ]]; then
@@ -433,14 +433,14 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Size
             episode_size_field=""
-            if [[ ${drop_fields} != *size* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<size\>') ]]; then
                 episode_size=$(PrettyPrintSize "$(echo "${episode_file}" | jq -r '.size')")
                 episode_size_field='{"name": "Size", "value": "'${episode_size}'", "inline": true},'
             fi
 
             # Audio Languages
             episode_languages_field=""
-            if [[ ${drop_fields} != *languages* ]] && [[ ${drop_fields} != *audio* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<languages\>') ]] && ! [[ $drop_fields =~ $(echo '\<audio\>') ]]; then
                 episode_languages=$(echo "${episode_file}" | jq -r '.mediaInfo.audioLanguages')
                 if [[ ${episode_languages} != "null" ]] && [[ -n ${episode_languages} ]]; then
                     episode_languages_field='{"name": "Audio", "value": "'${episode_languages}'", "inline": true},'
@@ -449,7 +449,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Subtitles
             episode_subtitles_field=""
-            if [[ ${drop_fields} != *subtitles* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<subtitles\>') ]]; then
                 episode_subtitles=$(echo "${episode_file}" | jq -r '.mediaInfo.subtitles')
                 if [[ ${episode_subtitles} != "null" ]] && [[ -n ${episode_subtitles} ]]; then
                     episode_subtitles_field='{"name": "Subtitles", "value": "'${episode_subtitles}'", "inline": true},'
@@ -458,7 +458,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
 
             # Release
             episode_scene_name_field=""
-            if [[ ${drop_fields} != *release* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<release\>') ]]; then
                 episode_scene_name=$(echo "${episode_file}" | jq -r '.sceneName')
                 if [[ ${episode_scene_name} != "null" ]] && [[ -n ${episode_scene_name} ]]; then
                     episode_scene_name_field='{"name": "Release", "value": "```'${episode_scene_name}'```"},'
@@ -466,7 +466,7 @@ if [[ ${sonarr_eventtype^^} == "DOWNLOAD" ]]; then
             fi
 
             # Episode Still if found
-            if [[ ${drop_fields} != *backdrop* ]]; then
+            if ! [[ $drop_fields =~ $(echo '\<backdrop\>') ]]; then
                 if [[ -n ${TMDB_API_KEY} ]]; then
                     tvshow_tmdbid="$(curl -fsSL "https://api.themoviedb.org/3/find/${sonarr_series_tvdbid}?api_key=${TMDB_API_KEY}&external_source=tvdb_id" | jq -r '.tv_results[0].id')"
                     if [[ ${tvshow_tmdbid} != null ]]; then
