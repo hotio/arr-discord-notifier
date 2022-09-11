@@ -143,7 +143,7 @@ if [[ ${radarr_eventtype^^} == "DOWNLOAD" ]]; then
         # Rating
         movie_rating_field=""
         if ! [[ $drop_fields =~ $(echo '\<rating\>') ]]; then
-            movie_rating=$(echo "${movie}" | jq -r '.[].ratings.value')
+            movie_rating=$(echo "${movie}" | jq -r '.[].ratings.imdb.value')
             if [[ ${movie_rating} != "0" ]] && [[ -n ${movie_rating} ]]; then
                 movie_rating_field='{"name": "Rating", "value": "'${movie_rating}'"},'
             fi
