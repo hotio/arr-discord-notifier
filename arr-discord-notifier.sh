@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 global_exit_code=0
 
